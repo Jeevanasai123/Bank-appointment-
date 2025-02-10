@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Bank Appointment Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            margin-top: 100px;
+            max-width: 400px;
+        }
+
+        .card {
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-google {
+            background-color: #4285f4;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-google:hover {
+            background-color: #357ae8;
+        }
+
+        .btn-google:focus {
+            background-color: #357ae8;
+        }
+
+        .btn-google i {
+            margin-right: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title text-center" id="formTitle">Sign In</h2>
+            <div id="googleSignInContainer" class="d-flex justify-content-center">
+                <button class="btn btn-google w-100" id="googleSignInBtn">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+            </div>
+            <div id="emailLoginSignUpContainer" style="display: none;">
+                <div id="signInForm" style="display: block;">
+                    <h3>Sign In</h3>
+                    <input type="email" id="signInEmail" class="form-control" placeholder="Enter your email" required><br>
+                    <input type="password" id="signInPassword" class="form-control" placeholder="Enter your password" required><br>
+                    <button id="submitSignInBtn" class="btn btn-primary w-100">Sign In</button>
+                </div>
+            </div>
+            <div id="toggleOptions" class="d-flex justify-content-center mt-3">
+                <button class="btn btn-link" id="showSignUp" style="display:none;">New user? Sign up here</button>
+                <button class="btn btn-link" id="showSignIn">Already have an account? Sign in here</button>
+            </div>
+            <div class="footer">
+                <p>Don't have an account? <a href="javascript:void(0)" id="showSignUpFromGoogle">Sign Up with Google</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js';
+        import {
+            getAuth,
+            GoogleAuthProvider,
+            signInWithPopup,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged
+        } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOo5pcpVEBGeK1Mk7PjOsJW_fDBhPkl-U",
+            authDomain: "bankappointment-a479c.firebaseapp.com",
+            projectId: "bankappointment-a479c",
+            storageBucket: "bankappointment-a479c.appspot.com",
+            messagingSenderId: "318938286613",
+            appId: "1:318938286613:web:d815fdd13472a2bb401c1c",
+            measurementId: "G-G01PCZ4Q8C"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Check if user is already signed in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "index.html"; // Redirect to index.html if already logged in
+            }
+        });
+
+        // Google Sign-In Button
+        document.getElementById('googleSignInBtn').addEventListener('click', function () {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log('User logged in with Google:', user);
+                    window.location.href = "index.html"; // Redirect to index.html after Google sign-in
+                })
+                .catch((error) => {
+                    console.error("Error during Google sign-in:", error);
+                    alert("Error during login. Please try again.");
+                });
+        });
+
+        // Show email sign-in form
+        document.getElementById('showSignIn').addEventListener('click', () => {
+            document.getElementById('formTitle').innerText = 'Sign In';
+            document.getElementById('googleSignInContainer').style.display = 'none';
+            document.getElementById('emailLoginSignUpContainer').style.display = 'block';
+            document.getElementById('showSignIn').style.display = 'none';
+            document.getElementById('showSignUp').style.display = 'inline';
+        });
+
+        // Show Google sign-up form
+        document.getElementById('showSignUpFromGoogle').addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log('User signed up with Google:', user);
+                    window.location.href = "index.html"; // Redirect to index.html after Google sign-up
+                })
+                .catch((error) => {
+                    console.error("Error during Google sign-up:", error);
+                    alert("Error during sign-up. Please try again.");
+                });
+        });
+
+        // Sign In with Email and Password
+        document.getElementById('submitSignInBtn').addEventListener('click', function () {
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log('User signed in:', user);
+                    window.location.href = "index.html"; // Redirect to index.html after sign-in
+                })
+                .catch((error) => {
+                    console.error("Error during sign-in:", error);
+                    alert("Invalid email or password. Please check your credentials.");
+                });
+        });
+    </script>
+</body>
+
+</html>
